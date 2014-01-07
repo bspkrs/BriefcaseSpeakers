@@ -12,6 +12,9 @@ import bspkrs.briefcasespeakers.item.ItemList;
 import bspkrs.briefcasespeakers.lib.Reference;
 import bspkrs.briefcasespeakers.recipes.CraftingRecipes;
 import bspkrs.briefcasespeakers.server.BriefcaseSpeakersServer;
+import bspkrs.bspkrscore.fml.bspkrsCoreMod;
+import bspkrs.util.Const;
+import bspkrs.util.ModVersionChecker;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.Mod.Instance;
@@ -26,13 +29,17 @@ import cpw.mods.fml.common.network.NetworkMod;
 import cpw.mods.fml.common.network.NetworkMod.SidedPacketHandler;
 import cpw.mods.fml.common.network.Player;
 
-@Mod(modid = Reference.MODID, name = Reference.MODNAME, version = Reference.VERSION)
+@Mod(modid = Reference.MODID, name = Reference.MODNAME, version = Reference.VERSION, dependencies = "required-after:bspkrsCore", useMetadata = true)
 @NetworkMod(clientSideRequired = false, serverSideRequired = false,
         clientPacketHandlerSpec = @SidedPacketHandler(channels = { Reference.PACKET_CHANNEL }, packetHandler = BriefcaseSpeakersClient.class),
         serverPacketHandlerSpec = @SidedPacketHandler(channels = { Reference.PACKET_CHANNEL }, packetHandler = BriefcaseSpeakersServer.class),
         connectionHandler = BriefcaseSpeakersMod.class)
 public class BriefcaseSpeakersMod implements IConnectionHandler
 {
+    protected ModVersionChecker        versionChecker;
+    private final String               versionURL = Const.VERSION_URL + "/Minecraft/" + Const.MCVERSION + "/briefcaseSpeakers.version";
+    private final String               mcfTopic   = "http://www.minecraftforum.net/topic/1114612-";
+    
     @Instance(Reference.MODID)
     public static BriefcaseSpeakersMod instance;
     
@@ -53,8 +60,12 @@ public class BriefcaseSpeakersMod implements IConnectionHandler
     
     @EventHandler
     public void init(FMLInitializationEvent e)
-    {   
-        
+    {
+        if (bspkrsCoreMod.instance.allowUpdateCheck)
+        {
+            versionChecker = new ModVersionChecker(Reference.MODID, Reference.VERSION, versionURL, mcfTopic);
+            versionChecker.checkVersionWithLogging();
+        }
     }
     
     @EventHandler
